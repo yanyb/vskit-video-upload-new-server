@@ -241,3 +241,7 @@ func (p *Parser) parseContentLength() error {
 	}
 	return ErrParseContentLength
 }
+
+func (p *Parser) Size() int {
+	return p.N - p.ParseIndex
+}

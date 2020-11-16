@@ -4,9 +4,11 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/vskit-tv/vlog/log"
+	"go-app/app"
 	"go-app/util"
 	"net"
 	"os"
+	"path"
 	"regexp"
 	"strconv"
 	"strings"
@@ -25,7 +27,8 @@ type BadRequest struct {
 
 func (req *BadRequest) Do() *Response {
 	return &Response{
-		Code: StatusBadRequest,
+		Code:    StatusBadRequest,
+		Headers: make(map[string]string),
 	}
 }
 
@@ -44,7 +47,8 @@ type RequestTimeout struct {
 
 func (req *RequestTimeout) Do() *Response {
 	return &Response{
-		Code: StatusRequestTimeout,
+		Code:    StatusRequestTimeout,
+		Headers: make(map[string]string),
 	}
 }
 
@@ -76,11 +80,14 @@ func (req *RequestOk) GetId() string {
 
 func (req *RequestOk) Do() *Response {
 	if strings.Contains(req.Path, "/vshow/file/upload") {
-		isFinished, rangeInfo, err := req.saveFile()
+		filename := req.getFilename()
+		filepath := path.Join(app.GetDataPath(), req.getSessionID())
+		isFinished, rangeInfo, err := req.saveFile(filepath)
 		if err != nil {
 			log.Errorf("save file error %+v", err)
 			return &Response{
-				Code: StatusInternalServerError,
+				Code:    StatusInternalServerError,
+				Headers: map[string]string{},
 			}
 		}
 
@@ -95,10 +102,15 @@ func (req *RequestOk) Do() *Response {
 		}
 
 		return ForwardRequest(
-			Method(req.Method),
+			Method(MethodPost),
 			Path(req.Path),
-			Headers(req.Headers),
-			Body(string(req.Body)),
+			Headers(map[string]string{
+				CommonHeaderTag: req.Headers[CommonHeaderTag],
+			}),
+			FormData(map[string]string{
+				".name": filename,
+				".path": filepath,
+			}),
 		)
 	}
 
@@ -106,31 +118,30 @@ func (req *RequestOk) Do() *Response {
 		Method(req.Method),
 		Path(req.Path),
 		Headers(req.Headers),
-		Body(string(req.Body)),
+		Body(req.Body),
 	)
 }
 
 // 视频上传处理,返回是否完成信息
-func (req *RequestOk) saveFile() (bool, string, error) {
-	filename := req.getfilename()
+func (req *RequestOk) saveFile(filepath string) (bool, string, error) {
 	contentRange := req.getContentRange()
 	start, end, length, err := getContentRange(contentRange)
 	if err != nil {
 		return false, "", err
 	}
-	records, err := getUploadRecord(filename)
+	records, err := getUploadRecord(filepath)
 	if err != nil {
 		return false, "", err
 	}
 	records = append(records, util.Interval{start, end})
 	records = util.Merge(records)
 
-	err = saveFile(filename, req.Body, start, end)
+	err = saveFile(filepath, req.Body, start, end)
 	if err != nil {
 		return false, "", err
 	}
 
-	err = saveUploadRecord(filename, records, length)
+	err = saveUploadRecord(filepath, records, length)
 	if err != nil {
 		return false, "", err
 	}
@@ -139,8 +150,14 @@ func (req *RequestOk) saveFile() (bool, string, error) {
 	return isFinished, rangeInfo, nil
 }
 
-func (req *RequestOk) getfilename() string {
+func (req *RequestOk) getSessionID() string {
 	return req.Headers["session-id"]
+}
+
+func (req *RequestOk) getFilename() string {
+	re := regexp.MustCompile(`.+filename="(.+)"`)
+	m := re.FindStringSubmatch(req.Headers["content-disposition"])
+	return m[1]
 }
 
 func (req *RequestOk) getContentRange() string {

@@ -31,7 +31,7 @@ loop:
 			}
 			break loop
 		case <-time.After(ClientTimeout):
-			if len(parser.Data) > 0 {
+			if parser.Size() > 0 {
 				reqQueue.Queue <- &RequestTimeout{
 					Id:   parser.Id,
 					Conn: parser.Conn,

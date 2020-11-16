@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"go-app/app"
+	"go-app/service"
 	"os"
 	"path"
 	"runtime"
@@ -28,5 +29,5 @@ func main() {
 	app.InitApp(configPath, *profile)
 
 	// 启动
-	app.Start()
+	service.Start()
 }

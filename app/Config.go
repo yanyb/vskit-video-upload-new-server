@@ -21,3 +21,7 @@ func initCfg(configPath string) {
 func GetDataPath() string {
 	return _cfg.App["data_dir"]
 }
+
+func GetAddr() string {
+	return ":" + _cfg.App["port"]
+}

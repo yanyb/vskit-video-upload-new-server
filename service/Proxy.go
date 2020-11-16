@@ -6,7 +6,8 @@ import (
 )
 
 const (
-	MaxRetryTimes = 3
+	MaxRetryTimes   = 3
+	CommonHeaderTag = "x-trassnet-client" // 请求头字段
 )
 
 var proxy = NewProxy()
@@ -17,10 +18,11 @@ type (
 		proxyHost string
 	}
 	Options struct {
-		Method  string
-		Path    string
-		Headers map[string]string
-		Body    string
+		Method   string
+		Path     string
+		Headers  map[string]string
+		FormData map[string]string
+		Body     interface{}
 	}
 	Option func(*Options)
 )
@@ -43,7 +45,13 @@ func Headers(headers map[string]string) Option {
 	}
 }
 
-func Body(body string) Option {
+func FormData(formdata map[string]string) Option {
+	return func(o *Options) {
+		o.FormData = formdata
+	}
+}
+
+func Body(body interface{}) Option {
 	return func(o *Options) {
 		o.Body = body
 	}
@@ -76,7 +84,11 @@ func ForwardRequest(options ...Option) *Response {
 	if opts.Method == MethodGet {
 		resp, err = req.Get(url)
 	} else {
-		resp, err = req.SetBody(opts.Body).Post(url)
+		if len(opts.FormData) > 0 {
+			resp, err = req.SetFormData(opts.FormData).Post(url)
+		} else {
+			resp, err = req.SetBody(opts.Body).Post(url)
+		}
 	}
 	if err != nil {
 		log.Errorf("forward request failed err = %+v", err)
