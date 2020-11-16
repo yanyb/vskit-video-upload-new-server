@@ -19,8 +19,8 @@ func Merge(s IntervalSlice) []Interval {
 		return s
 	}
 	result := []Interval{}
-	tmp := s[0]
 	sort.Sort(s)
+	tmp := s[0]
 	for _, i := range s[1:] {
 		if tmp.End >= i.Start-1 {
 			tmp.End = i.End

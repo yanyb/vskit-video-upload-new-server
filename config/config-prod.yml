@@ -1,5 +1,4 @@
 app:
-  mode: debug
   port: 6666
 
 global_config:
