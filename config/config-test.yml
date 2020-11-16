@@ -1,0 +1,20 @@
+app:
+  mode: debug
+  port: 6666
+  data_dir: /tmp/upload_temp
+
+logger:
+  enable_kafka: false
+  base:
+    log_path: /tmp/log
+    log_level: info
+    service_name: vskit-video-upload-new-server
+  kafka:
+    error_topic: "vskit_error_log"
+    client:
+      worker_pool:
+        worker_size: 10
+        pool_size: 1024
+        timeout: 3
+      hosts:
+        - innerdb.mylichking.com:9092

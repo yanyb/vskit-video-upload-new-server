@@ -1,7 +1,7 @@
 app:
   mode: debug
   port: 6666
-  data_dir: /tmp/data
+  data_dir: /tmp/upload_temp
 
 logger:
   enable_kafka: false
