@@ -11,7 +11,7 @@ logger:
   base:
     log_path: /tmp/log
     log_level: info
-    service_name: vskit-video-upload-new-server
+    service_name: vskit-video-upload-file-server
   kafka:
     error_topic: "vskit_error_log"
     client:
