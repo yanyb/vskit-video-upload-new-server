@@ -1,7 +1,10 @@
 app:
   mode: debug
   port: 6666
+
+global_config:
   data_dir: /tmp/upload_temp
+  upstream_host: "vskit-video-upload-server"
 
 logger:
   enable_kafka: false

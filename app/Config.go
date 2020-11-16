@@ -19,7 +19,11 @@ func initCfg(configPath string) {
 }
 
 func GetDataPath() string {
-	return _cfg.App["data_dir"]
+	return _cfg.GlobalCfg["data_dir"]
+}
+
+func GetUpstreamHost() string {
+	return _cfg.GlobalCfg["upstream_host"]
 }
 
 func GetAddr() string {

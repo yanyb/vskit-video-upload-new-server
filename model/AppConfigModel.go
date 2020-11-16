@@ -5,6 +5,7 @@ import (
 )
 
 type Config struct {
-	App    map[string]string   `yaml:"app,omitempty"`
-	Logger _model.LoggerConfig `yaml:"logger,omitempty"`
+	App       map[string]string   `yaml:"app,omitempty"`
+	GlobalCfg map[string]string   `yaml:"global_config,omitempty"`
+	Logger    _model.LoggerConfig `yaml:"logger,omitempty"`
 }

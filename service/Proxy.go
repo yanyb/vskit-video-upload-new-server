@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/vskit-tv/vlog/log"
+	"go-app/app"
 	"gopkg.in/resty.v1"
 )
 
@@ -14,8 +15,7 @@ var proxy = NewProxy()
 
 type (
 	Proxy struct {
-		client    *resty.Client
-		proxyHost string
+		client *resty.Client
 	}
 	Options struct {
 		Method   string
@@ -59,15 +59,14 @@ func Body(body interface{}) Option {
 
 func NewProxy() *Proxy {
 	proxy := &Proxy{
-		client:    resty.New(),
-		proxyHost: "api.mylichking.com",
+		client: resty.New(),
 	}
 	proxy.client.SetRetryCount(MaxRetryTimes)
 	return proxy
 }
 
 func (p *Proxy) getUpstreamHost() string {
-	return p.proxyHost
+	return app.GetUpstreamHost()
 }
 
 func ForwardRequest(options ...Option) *Response {
